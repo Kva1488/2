@@ -439,7 +439,16 @@ export class App {
       s.classList.toggle('open');
       if (s.classList.contains('open')) $('search-input').focus();
     });
-    if (EMBED) document.querySelectorAll('[data-native]').forEach((el) => (el.hidden = true));
+    if (EMBED) {
+      document.querySelectorAll('[data-native]').forEach((el) => (el.hidden = true));
+      // Во встроенном просмотре файл можно отдать только через платформенную возможность downloads.
+      document.querySelectorAll('[data-shot]').forEach((el) => (el.hidden = true));
+      window.claude?.use?.('downloads').then((d) => {
+        if (!d) return;
+        this.downloads = d;
+        document.querySelectorAll('[data-shot]').forEach((el) => (el.hidden = false));
+      }).catch(() => {});
+    }
     if (!OrientationAR.supported() || !('ontouchstart' in window)) $('ar-btn').hidden = true;
     if (!document.documentElement.requestFullscreen) $('full-btn').hidden = true;
     $('backdrop').addEventListener('click', () => this.closeDialogs());
@@ -1125,16 +1134,56 @@ export class App {
     } catch { /* нет полноэкранного режима */ }
   }
 
+  /** Снимок неба с подписью: место и момент. */
   screenshot() {
-    this.canvas.toBlob((blob) => {
+    const src = this.canvas;
+    const out = document.createElement('canvas');
+    out.width = src.width;
+    out.height = src.height;
+    const g = out.getContext('2d');
+    g.drawImage(src, 0, 0);
+    const k = src.width / this.camera.width;
+    const tz = this.place.tz;
+    const lp = localParts(tz, this.simMs);
+    const caption = `${this.place.name} · ${fmtDate(tz, this.simMs, { day: 'numeric', month: 'long', year: 'numeric' }).replace(' г.', '')}, ${fmtTime(tz, this.simMs)}`;
+    g.save();
+    g.scale(k, k);
+    const grad = g.createLinearGradient(0, this.camera.height - 90, 0, this.camera.height);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.65)');
+    g.fillStyle = grad;
+    g.fillRect(0, this.camera.height - 90, this.camera.width, 90);
+    g.fillStyle = '#e6b563';
+    g.font = '15px Forum, Georgia, serif';
+    if ('letterSpacing' in g) g.letterSpacing = '5px';
+    g.fillText('НЕБОСВОД', 20, this.camera.height - 44);
+    if ('letterSpacing' in g) g.letterSpacing = '0px';
+    g.fillStyle = 'rgba(231,234,243,0.92)';
+    g.font = '14px "Golos Text", system-ui, sans-serif';
+    g.fillText(caption, 20, this.camera.height - 22);
+    g.restore();
+    const name = `nebosvod-${lp.y}-${String(lp.mo).padStart(2, '0')}-${String(lp.d).padStart(2, '0')}-${String(lp.h).padStart(2, '0')}${String(lp.mi).padStart(2, '0')}.png`;
+    out.toBlob(async (blob) => {
       if (!blob) return;
+      if (this.downloads) {
+        try {
+          await this.downloads.save({ filename: name, data: blob });
+        } catch (e) {
+          const code = e?.code;
+          if (code === 'rate_limited') this.toast('Окно сохранения уже открыто — подождите немного.');
+          else if (code !== 'declined') {
+            this.toast('Сохранить снимок здесь не получится.');
+            document.querySelectorAll('[data-shot]').forEach((el) => (el.hidden = true));
+          }
+        }
+        return;
+      }
       const a = document.createElement('a');
-      const lp = localParts(this.place.tz, this.simMs);
-      a.download = `nebosvod-${lp.y}-${String(lp.mo).padStart(2, '0')}-${String(lp.d).padStart(2, '0')}-${String(lp.h).padStart(2, '0')}${String(lp.mi).padStart(2, '0')}.png`;
+      a.download = name;
       a.href = URL.createObjectURL(blob);
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    });
+    }, 'image/png');
   }
 
   async toggleAR() {
