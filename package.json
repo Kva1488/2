@@ -1,0 +1,22 @@
+{
+  "name": "nebosvod",
+  "version": "1.0.0",
+  "description": "Небосвод — живая карта звёздного неба в браузере: реальные звёзды, планеты, Луна, сумерки, затмения и AR-режим. Работает офлайн.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "data": "node scripts/build-data.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "npm test && npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "d3-celestial": "^0.7.35",
+    "esbuild": "^0.28.2"
+  }
+}

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Небосвод</title>
+<meta name="description" content="Живая карта звёздного неба: реальные звёзды, планеты, Луна, сумерки, затмения и метеорные потоки над вашим городом — сейчас, в прошлом и в будущем.">
+<meta name="theme-color" content="#04060c">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<!-- build:css -->
+<link rel="stylesheet" href="src/styles.css">
+<!-- /build:css -->
+</head>
+<body>
+<!-- build:body -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M12 7.5v5l3 2"/><circle cx="12" cy="18.2" r=".6"/></symbol>
+  <symbol id="i-night" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10Z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.2 1-1.2 1.9v.5"/><circle cx="12" cy="17" r=".5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5L8 5.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5.5v13M16 5.5v13" stroke-width="3"/></symbol>
+  <symbol id="i-rew" viewBox="0 0 24 24"><path d="m11 18-7-6 7-6v12ZM20 18l-7-6 7-6v12Z"/></symbol>
+  <symbol id="i-ffw" viewBox="0 0 24 24"><path d="m13 6 7 6-7 6V6ZM4 6l7 6-7 6V6Z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+  <symbol id="i-track" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><ellipse cx="12" cy="12" rx="9.5" ry="4.5" transform="rotate(-25 12 12)"/></symbol>
+  <symbol id="i-shot" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4V8Z"/><circle cx="12" cy="13.3" r="3.3"/></symbol>
+  <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".8"/><circle cx="4.5" cy="12" r=".8"/><circle cx="4.5" cy="18" r=".8"/></symbol>
+  <symbol id="i-sky" viewBox="0 0 24 24"><path d="M12 2.5 13.6 10.4 21.5 12 13.6 13.6 12 21.5 10.4 13.6 2.5 12 10.4 10.4Z"/></symbol>
+  <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/><path d="M12 1.5V4M12 20v2.5M1.5 12H4M20 12h2.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <video id="camera-feed" playsinline muted hidden></video>
+  <canvas id="sky" aria-label="Карта звёздного неба. Перетаскивайте, чтобы осмотреться; колесо или щипок — масштаб; нажмите на объект, чтобы узнать о нём." role="img"></canvas>
+
+  <header class="top">
+    <div class="masthead">
+      <div class="brand"><svg class="icon brand-mark"><use href="#i-sky"/></svg>Небосвод</div>
+      <div class="readout glass">
+        <button id="place-btn" type="button" aria-haspopup="dialog">
+          <span class="lbl">Место</span>
+          <span class="place-name"><span id="place-name">Москва</span><svg class="icon" style="width:14px;height:14px"><use href="#i-chev"/></svg></span>
+        </button>
+        <span class="divider" aria-hidden="true"></span>
+        <button id="time-btn" type="button" aria-haspopup="dialog">
+          <span class="clock" id="clock">00:00</span>
+          <span class="clock-sub" id="clock-sub">—</span>
+        </button>
+      </div>
+      <button class="live-chip" id="live-chip" type="button"><span class="dot"></span><span id="live-text">Сейчас</span></button>
+    </div>
+    <div class="tools">
+      <div class="search" id="search">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input id="search-input" type="search" placeholder="Звезда, планета, созвездие…" autocomplete="off" spellcheck="false" aria-label="Поиск по небу" aria-controls="search-results">
+        <kbd aria-hidden="true">/</kbd>
+        <div class="results glass" id="search-results" role="listbox" hidden></div>
+      </div>
+      <div class="toolrow glass" role="toolbar" aria-label="Инструменты">
+        <button class="tool" id="search-toggle" type="button" title="Поиск" aria-label="Поиск"><svg class="icon"><use href="#i-search"/></svg></button>
+        <button class="tool" id="layers-btn" type="button" title="Слои и настройки (L)" aria-label="Слои и настройки"><svg class="icon"><use href="#i-layers"/></svg></button>
+        <button class="tool" id="ar-btn" type="button" title="Навести телефон на небо" aria-label="Режим дополненной реальности" aria-pressed="false" data-native><svg class="icon"><use href="#i-compass"/></svg></button>
+        <button class="tool" id="night-btn" type="button" title="Красный ночной режим (R)" aria-label="Красный ночной режим" aria-pressed="false"><svg class="icon"><use href="#i-night"/></svg></button>
+        <button class="tool desk-only" id="shot-btn" type="button" title="Сохранить снимок неба" aria-label="Сохранить снимок неба" data-native><svg class="icon"><use href="#i-shot"/></svg></button>
+        <button class="tool desk-only" id="full-btn" type="button" title="Во весь экран (F)" aria-label="Во весь экран"><svg class="icon"><use href="#i-full"/></svg></button>
+        <button class="tool desk-only" id="help-btn" type="button" title="Справка (?)" aria-label="Справка"><svg class="icon"><use href="#i-help"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <button class="panel-toggle" id="panel-open" type="button" hidden><svg class="icon"><use href="#i-list"/></svg><span id="panel-open-text">Сегодня ночью</span></button>
+
+  <aside class="panel glass" id="panel" aria-label="Сведения">
+    <div class="sheet-handle" id="sheet-handle" aria-hidden="true"></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-tonight" aria-selected="true" data-tab="tonight">Сегодня ночью</button>
+      <button role="tab" id="tab-events" aria-selected="false" data-tab="events">События</button>
+      <button role="tab" id="tab-object" aria-selected="false" data-tab="object" hidden>Объект</button>
+      <button class="tool tab-close" id="panel-close" type="button" aria-label="Свернуть панель"><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="panel-body" id="panel-body" role="tabpanel"></div>
+  </aside>
+
+  <footer class="timebar glass">
+    <div class="tctl">
+      <button class="tool" id="t-prev" type="button" title="На сутки назад" aria-label="На сутки назад"><svg class="icon"><use href="#i-prev"/></svg></button>
+      <button class="tool" id="t-slower" type="button" title="Медленнее / назад" aria-label="Медленнее"><svg class="icon"><use href="#i-rew"/></svg></button>
+      <button class="tool play" id="t-play" type="button" title="Пуск / пауза (пробел)" aria-label="Пауза"><svg class="icon" id="t-play-icon"><use href="#i-pause"/></svg></button>
+      <button class="tool" id="t-faster" type="button" title="Быстрее" aria-label="Быстрее"><svg class="icon"><use href="#i-ffw"/></svg></button>
+      <button class="tool" id="t-next" type="button" title="На сутки вперёд" aria-label="На сутки вперёд"><svg class="icon"><use href="#i-next"/></svg></button>
+      <span class="speed" id="speed" aria-live="polite">×1</span>
+    </div>
+    <div class="ribbon-wrap"><canvas id="ribbon" aria-label="Шкала суток: день, сумерки и ночь. Перетащите, чтобы изменить время." role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1440"></canvas></div>
+    <button class="btn now-btn" id="t-now" type="button">Сейчас</button>
+  </footer>
+
+  <div class="ar-hint" id="ar-hint" hidden><div class="ar-cross"></div>Наведите телефон на небо</div>
+  <div class="toast glass" id="toast" role="status" hidden></div>
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <section class="dialog glass layers" id="dlg-layers" role="dialog" aria-label="Слои и настройки" hidden>
+    <button class="tool close" type="button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button>
+    <h2>Что показывать</h2>
+    <div class="switches" id="switches"></div>
+    <div class="field">
+      <span>Засветка неба: <b id="bortle-name">Пригород</b> <span class="muted" id="bortle-lm"></span></span>
+      <input type="range" id="bortle" min="1" max="9" step="1" value="5" aria-label="Засветка по шкале Бортля">
+    </div>
+    <div class="field">
+      <span>Пейзаж</span>
+      <div class="seg" id="landscape-seg"></div>
+    </div>
+    <div class="actions mobile-only">
+      <button class="btn" type="button" id="shot-btn-m" data-native><svg class="icon"><use href="#i-shot"/></svg>Снимок неба</button>
+      <button class="btn" type="button" id="help-btn-m"><svg class="icon"><use href="#i-help"/></svg>Справка</button>
+    </div>
+  </section>
+
+  <section class="dialog glass place" id="dlg-place" role="dialog" aria-label="Место наблюдения" hidden>
+    <button class="tool close" type="button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button>
+    <h2>Место наблюдения</h2>
+    <p class="sub">Небо считается для выбранной точки Земли и её часового пояса.</p>
+    <div class="field"><input class="text-input" id="city-q" type="search" placeholder="Найти город" autocomplete="off" aria-label="Найти город"></div>
+    <div class="city-list" id="city-list"></div>
+    <div class="field">
+      <span>Или координаты (широта, долгота; восток и север — со знаком плюс)</span>
+      <div class="two">
+        <input class="text-input mono" id="lat-in" inputmode="decimal" placeholder="55.7558" aria-label="Широта">
+        <input class="text-input mono" id="lon-in" inputmode="decimal" placeholder="37.6173" aria-label="Долгота">
+      </div>
+      <div class="actions" style="margin-top:6px">
+        <button class="btn" id="coord-apply" type="button">Применить координаты</button>
+        <button class="btn" id="geo-btn" type="button" data-native><svg class="icon"><use href="#i-locate"/></svg>Где я?</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="dialog glass timepick" id="dlg-time" role="dialog" aria-label="Дата и время" hidden>
+    <button class="tool close" type="button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button>
+    <h2>Машина времени</h2>
+    <p class="sub">Небо над выбранным местом в любую дату от 1000 до 3000 года. Планеты точнее всего в 1800–2050 гг.</p>
+    <div class="field">
+      <span>Дата и местное время</span>
+      <div class="two">
+        <input class="text-input mono" id="date-in" type="date" min="1000-01-01" max="3000-12-31" aria-label="Дата">
+        <input class="text-input mono" id="clock-in" type="time" aria-label="Время">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="time-apply" type="button">Перейти</button>
+      <button class="btn" data-jump="dusk" type="button">Сумерки</button>
+      <button class="btn" data-jump="midnight" type="button">Полночь</button>
+      <button class="btn" data-jump="dawn" type="button">Рассвет</button>
+    </div>
+    <div class="field">
+      <span>Небо в день, который важен для вас: например, ваш день рождения. Укажите дату и нажмите «Перейти».</span>
+    </div>
+  </section>
+
+  <section class="dialog glass help" id="dlg-help" role="dialog" aria-label="Справка" hidden>
+    <button class="tool close" type="button" data-close aria-label="Закрыть"><svg class="icon"><use href="#i-close"/></svg></button>
+    <h2>Как пользоваться</h2>
+    <p class="sub">Тащите небо, чтобы осмотреться. Колесо мыши или два пальца меняют масштаб. Нажмите на звезду, планету или туманность, чтобы узнать о ней. Шкала внизу — это сутки: перетащите её, чтобы увидеть небо в другое время.</p>
+    <div class="kbd-grid">
+      <kbd>/</kbd><span>Поиск</span>
+      <kbd>Пробел</kbd><span>Пуск и пауза времени</span>
+      <kbd>[ ]</kbd><span>Час назад и вперёд (с Shift — сутки)</span>
+      <kbd>N</kbd><span>Вернуться к текущему моменту</span>
+      <kbd>← → ↑ ↓</kbd><span>Осмотреться</span>
+      <kbd>+ −</kbd><span>Масштаб</span>
+      <kbd>C</kbd><span>Фигуры созвездий</span>
+      <kbd>A</kbd><span>Атмосфера (днём тоже видно звёзды)</span>
+      <kbd>G</kbd><span>Земля: убрать, чтобы увидеть небо под ногами</span>
+      <kbd>M</kbd><span>Млечный Путь</span>
+      <kbd>R</kbd><span>Красный ночной режим для наблюдений</span>
+      <kbd>L</kbd><span>Слои и настройки</span>
+      <kbd>F</kbd><span>Во весь экран</span>
+    </div>
+    <p class="credits">Всё считается прямо в браузере, без сервера: положения Солнца и Луны — по алгоритмам Ж. Миуса (ELP-2000/82), планеты — по элементам орбит JPL, затмения проверены по каталогу NASA. Звёзды — каталог Hipparcos (≈5 000 звёзд до 6,5<sup>m</sup>) из проекта <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener">d3-celestial</a> (BSD-3). Границы созвездий — МАС.</p>
+  </section>
+
+  <div class="night-filter" aria-hidden="true"></div>
+</div>
+<!-- /build:body -->
+<!-- build:js -->
+<script type="module" src="src/main.js"></script>
+<!-- /build:js -->
+</body>
+</html>
